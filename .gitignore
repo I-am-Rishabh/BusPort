@@ -1,0 +1,64 @@
+############################
+# Build Output Directories #
+############################
+target/
+build/
+!**/src/main/**/target/
+!**/src/test/**/target/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+###########
+# Logs    #
+###########
+*.log
+logs/
+
+##################
+# OS-specific    #
+##################
+.DS_Store
+Thumbs.db
+
+#################
+# Eclipse / STS #
+#################
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+##################
+# IntelliJ IDEA  #
+##################
+.idea
+*.iws
+*.iml
+*.ipr
+
+#################
+# NetBeans      #
+#################
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+#############
+# VS Code   #
+#############
+.vscode/
+
+################
+# Maven Wrapper
+################
+.mvn/wrapper/maven-wrapper.jar
+
+##########
+# Other  #
+##########
+HELP.md
