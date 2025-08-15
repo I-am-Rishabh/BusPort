@@ -6,7 +6,7 @@
 [![MySQL](https://img.shields.io/badge/MySQL-8.0-blue?style=flat-square&logo=mysql&logoColor=white)](https://www.mysql.com/)
 [![JWT](https://img.shields.io/badge/JWT-Auth-000000?style=flat-square&logo=jsonwebtokens&logoColor=white)](https://jwt.io/)
 [![Microservices](https://img.shields.io/badge/Architecture-Microservices-blueviolet?style=flat-square&logo=microgenetics&logoColor=white)](https://microservices.io/)
-[![REST API](https://img.shields.io/badge/API-REST-02569B?style=flat-square&logo=swagger&logoColor=white)](https://restfulapi.net/)
+
 
 
 A comprehensive microservices-based bus reservation system built with Spring Boot, providing user authentication, bus management, route planning, scheduling, and booking capabilities.
