@@ -16,5 +16,5 @@ public interface BookingService {
     List<BookingResponseDto> getUserBookings(Long userId);
     List<BookingResponseDto> getUpcomingJourneys(Long userId);
     boolean hasActiveBookingsByScheduleId(Long scheduleId);
-    List<PassengerResponseDto> getPassengersBySchedule(Long scheduleId);
+    List<PassengerResponseDto> getPassengersByScheduleId(Long scheduleId);
 }

@@ -172,6 +172,33 @@ public List<BookingResponseDto> getAllBookings() {
         return bookingRepository.existsByScheduleIdAndStatus(scheduleId, BookingStatus.CONFIRMED);
     }
 
+    @Override
+    public List<PassengerResponseDto> getPassengersByScheduleId(Long scheduleId) {
+        // Validate input - throw exception directly
+//        validateScheduleId(scheduleId);
+
+        // Fetch passengers - let DataAccessException bubble up to global handler
+        List<Passenger> passengers = passengerRepository.findPassengersByScheduleId(scheduleId);
+
+        // Convert to DTO - any conversion error will bubble up
+        return passengers.stream()
+                .map(this::mapToPassengerResponseDto)
+                .collect(Collectors.toList());
+    }
+
+
+
+    private PassengerResponseDto convertToDto(Passenger passenger) {
+        // Direct conversion - any NPE or conversion error will bubble up
+        return new PassengerResponseDto(
+                passenger.getPassengerId(),
+                passenger.getPassengerName(),
+                passenger.getAge(),
+                passenger.getGender(),
+                passenger.getSeatNumber()
+        );
+    }
+
 
 
     @Override
@@ -291,6 +318,7 @@ public List<BookingResponseDto> getAllBookings() {
     }
 
     private PassengerResponseDto mapToPassengerResponseDto(Passenger passenger) {
+//        PassengerResponseDto dto = new PassengerResponseDto(1L, "Alice", 25, "F");
         PassengerResponseDto dto = new PassengerResponseDto();
         dto.setPassengerId(passenger.getPassengerId());
         dto.setPassengerName(passenger.getPassengerName());
@@ -315,22 +343,4 @@ public List<BookingResponseDto> getAllBookings() {
         dto.setRefundPercent(refundPerc);
         return dto;
     }
-    
-    @Override
-    public List<PassengerResponseDto> getPassengersBySchedule(Long scheduleId) {
-
-        List<Booking> bookings = bookingRepository.findByScheduleId(scheduleId);
-        if (bookings.isEmpty()) {
-            return Collections.emptyList();
-        }
-        List<Long> bookingIds = bookings.stream()
-                .map(Booking::getId)
-                .toList();
-
-        List<Passenger> passengers = passengerRepository.findByBookingIdIn(bookingIds);
-        return passengers.stream()
-                .map(this::mapToPassengerResponseDto)
-                .collect(Collectors.toList());
-    }
-
 }

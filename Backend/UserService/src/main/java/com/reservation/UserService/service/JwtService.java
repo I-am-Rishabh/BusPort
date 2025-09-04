@@ -92,7 +92,7 @@ public class JwtService {
                 .parseClaimsJws(token)
                 .getBody();
     }
-//Converts the secret string into a cryptographic key used to sign/validate JWTs.
+    //Converts the secret string into a cryptographic key used to sign/validate JWTs.
     private Key getSignInKey() {
         byte[] keyBytes = jwtSecret.getBytes();
         return Keys.hmacShaKeyFor(keyBytes);

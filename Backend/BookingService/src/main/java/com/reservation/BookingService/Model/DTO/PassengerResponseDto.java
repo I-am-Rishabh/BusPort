@@ -17,6 +17,4 @@ public class PassengerResponseDto {
     private Gender gender;
     private Integer seatNumber;
 
-
-
 }

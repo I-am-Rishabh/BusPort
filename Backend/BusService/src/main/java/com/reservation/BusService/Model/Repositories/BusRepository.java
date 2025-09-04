@@ -16,4 +16,8 @@ public interface BusRepository extends JpaRepository<Bus, Long> {
 
     @Query("SELECT CASE WHEN COUNT(s) > 0 THEN true ELSE false END FROM Schedule s WHERE s.bus.id = :busId")
     boolean existsByBusIdInSchedules(@Param("busId") Long busId);
+
+
+
+
 }

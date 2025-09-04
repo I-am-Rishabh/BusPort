@@ -24,6 +24,7 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
                                       @Param("destination") String destination,
                                       @Param("date") LocalDate date);
 
+    boolean existsByBusIdAndTravelDate(Long busId, LocalDate travelDate);
 
 
     @Query("SELECT s FROM Schedule s " +
@@ -46,5 +47,7 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
 
         @Query(value = "SELECT COUNT(*) FROM schedules WHERE id = :scheduleId", nativeQuery = true)
         int countById(@Param("scheduleId") Long scheduleId);
+
+
 
 }

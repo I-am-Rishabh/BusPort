@@ -67,12 +67,12 @@ public class BookingController {
         return ResponseEntity.ok(hasActiveBookings);
     }
 
-    //14-08-2025
-    @GetMapping("/schedule/{scheduleId}/passengers")
-    public ResponseEntity<List<PassengerResponseDto>> getPassengersBySchedule(@PathVariable Long scheduleId) {
-        List<PassengerResponseDto> passengers = bookingService.getPassengersBySchedule(scheduleId);
+    @GetMapping("/{scheduleId}/passengers")
+    public ResponseEntity<List<PassengerResponseDto>> getPassengersByScheduleId(
+            @PathVariable Long scheduleId) {
+
+        // Service handles all exceptions, controller just calls service and returns success response
+        List<PassengerResponseDto> passengers = bookingService.getPassengersByScheduleId(scheduleId);
         return ResponseEntity.ok(passengers);
     }
-
-
 }

@@ -12,7 +12,15 @@ import java.util.List;
 @Repository
 public interface PassengerRepository extends JpaRepository<Passenger, Long> {
     List<Passenger> findByBookingId(Long bookingId);
-    List<Passenger> findByBookingIdIn(List<Long> bookingIds);
+
     @Query("SELECT p.seatNumber FROM Passenger p WHERE p.booking.scheduleId = :scheduleId AND p.booking.status = 'CONFIRMED'")
     List<Integer> findOccupiedSeatsByScheduleId(@Param("scheduleId") Long scheduleId);
+
+    @Query(value = "SELECT p.* FROM passengers p " +
+            "INNER JOIN booking b ON p.booking_id = b.id " +
+            "WHERE b.schedule_id = :scheduleId " +
+            "AND b.status = 'CONFIRMED'",
+            nativeQuery = true)
+    List<Passenger> findPassengersByScheduleId(@Param("scheduleId") Long scheduleId);
+
 }

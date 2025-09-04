@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,8 +32,20 @@ public class ScheduleServiceImpl implements ScheduleService {
     private final RouteRepository routeRepository;
     private final BookingServiceClient bookingServiceClient;
 
+
     @Override
     public ScheduleResponseDto createSchedule(ScheduleRequestDto scheduleRequestDto) {
+        // Check if bus is already scheduled for the same day
+        boolean exists = scheduleRepository.existsByBusIdAndTravelDate(
+                scheduleRequestDto.getBusId(),
+                scheduleRequestDto.getTravelDate() // Assuming getter returns a LocalDate
+        );
+
+        if (exists) {
+            throw new IllegalStateException("Bus is already scheduled for this date: " +
+                    scheduleRequestDto.getTravelDate());
+        }
+
         Bus bus = busRepository.findById(scheduleRequestDto.getBusId())
                 .orElseThrow(() -> new ResourceNotFoundException("Bus not found with id: " + scheduleRequestDto.getBusId()));
 
@@ -40,6 +53,7 @@ public class ScheduleServiceImpl implements ScheduleService {
                 .orElseThrow(() -> new ResourceNotFoundException("Route not found with id: " + scheduleRequestDto.getRouteId()));
 
         Schedule schedule = new Schedule();
+
         BeanUtils.copyProperties(scheduleRequestDto, schedule, "busId", "routeId");
         schedule.setBus(bus);
         schedule.setRoute(route);
@@ -53,8 +67,19 @@ public class ScheduleServiceImpl implements ScheduleService {
         return convertToResponseDto(savedSchedule);
     }
 
+
     @Override
     public ScheduleResponseDto updateSchedule(Long id, ScheduleRequestDto scheduleRequestDto) {
+        boolean exists = scheduleRepository.existsByBusIdAndTravelDate(
+                scheduleRequestDto.getBusId(),
+                scheduleRequestDto.getTravelDate() // Assuming getter returns a LocalDate
+        );
+
+        if (exists) {
+            throw new IllegalStateException("Bus is already scheduled for this date: " +
+                    scheduleRequestDto.getTravelDate());
+        }
+
         Schedule existingSchedule = scheduleRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Schedule not found with id: " + id));
 
@@ -68,23 +93,17 @@ public class ScheduleServiceImpl implements ScheduleService {
         existingSchedule.setBus(bus);
         existingSchedule.setRoute(route);
 
+        // Set available seats to total seats if not provided
+        if (scheduleRequestDto.getAvailableSeats() == null || scheduleRequestDto.getAvailableSeats() == 0) {
+            existingSchedule.setAvailableSeats(bus.getTotalSeats());
+        }
+
+
         Schedule updatedSchedule = scheduleRepository.save(existingSchedule);
         return convertToResponseDto(updatedSchedule);
     }
 
-/*
-    @Override
-    public void deleteSchedule(Long id) {
-        Schedule schedule = scheduleRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Schedule not found with id: " + id));
 
-
-            //TODO: Implement booking cancellation logic
-
-        scheduleRepository.delete(schedule);
-    }
-
-*/
 @Override
 public void deleteSchedule(Long id) {
     Schedule schedule = scheduleRepository.findById(id)
@@ -216,26 +235,44 @@ public void deleteSchedule(Long id) {
                 .collect(Collectors.toList());
     }
 
-    private ScheduleResponseDto convertToResponseDto(Schedule schedule) {
-        ScheduleResponseDto responseDto = new ScheduleResponseDto();
-        BeanUtils.copyProperties(schedule, responseDto, "bus", "route");
+private ScheduleResponseDto convertToResponseDto(Schedule schedule) {
+    ScheduleResponseDto responseDto = new ScheduleResponseDto();
+    BeanUtils.copyProperties(schedule, responseDto, "bus", "route");
 
-        // Convert bus
-        BusResponseDto busDto = new BusResponseDto();
-        BeanUtils.copyProperties(schedule.getBus(), busDto);
-        responseDto.setBus(busDto);
+    // Convert bus
+    BusResponseDto busDto = new BusResponseDto();
+    BeanUtils.copyProperties(schedule.getBus(), busDto);
+    responseDto.setBus(busDto);
 
-        // Convert route
-        RouteResponseDto routeDto = new RouteResponseDto();
-        BeanUtils.copyProperties(schedule.getRoute(), routeDto);
-        responseDto.setRoute(routeDto);
-        responseDto.setBusId(schedule.getBus().getId());
-        responseDto.setRouteId(schedule.getRoute().getId());
-        return responseDto;
+    // Get base price
+    BigDecimal price = schedule.getRoute().getPrice();
+
+    // Apply 40% increase if AC
+    if ("AC".equalsIgnoreCase(schedule.getBus().getBusType())) {
+        BigDecimal increase = price.multiply(BigDecimal.valueOf(0.4));
+        price = price.add(increase);
     }
+
+    // Convert route
+    RouteResponseDto routeDto = new RouteResponseDto();
+    BeanUtils.copyProperties(schedule.getRoute(), routeDto);
+    routeDto.setPrice(price); // Set the calculated price here
+
+    responseDto.setRoute(routeDto);
+    responseDto.setBusId(schedule.getBus().getId());
+    responseDto.setRouteId(schedule.getRoute().getId());
+
+    return responseDto;
+}
+
 
     private BusSearchResponseDto convertToSearchResponseDto(Schedule schedule) {
         BusSearchResponseDto responseDto = new BusSearchResponseDto();
+        BigDecimal price = schedule.getRoute().getPrice();
+        if (schedule.getBus().getBusType().equals("AC")) {
+            BigDecimal increase = price.multiply(BigDecimal.valueOf(0.4));
+            price = price.add(increase);
+        }
 
         responseDto.setScheduleId(schedule.getId());
         responseDto.setBusName(schedule.getBus().getBusName());
@@ -246,7 +283,7 @@ public void deleteSchedule(Long id) {
         responseDto.setToLocation(schedule.getRoute().getToLocation());
         responseDto.setDistanceKm(schedule.getRoute().getDistanceKm());
         responseDto.setDurationOfTravelMinutes(schedule.getRoute().getDurationOfTravelMinutes());
-        responseDto.setPrice(schedule.getRoute().getPrice());
+        responseDto.setPrice(price);
         responseDto.setTravelDate(schedule.getTravelDate());
         responseDto.setDeparture(schedule.getDeparture());
         responseDto.setArrival(schedule.getArrival());

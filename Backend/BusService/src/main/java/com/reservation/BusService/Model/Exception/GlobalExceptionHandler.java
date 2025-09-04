@@ -64,6 +64,13 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error("An unexpected error occurred: " + ex.getMessage()));
     }
 
+    @ExceptionHandler(IllegalStateException.class)
+        public ResponseEntity<ApiResponse<Void>> handleIllegalStateException (IllegalStateException ex){
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(ApiResponse.error(ex.getMessage()));
+        }
+
+
     @ExceptionHandler(ScheduleHasBookingsException.class)
     public ResponseEntity<ApiResponse<Void>> handleScheduleHasBookingsException(
             ScheduleHasBookingsException ex) {

@@ -41,7 +41,6 @@ public class GatewayRouteConfig {
                 )
                 .route("bus-service-route", r -> r
                         .path("/api/route/**")
-                        .filters(f -> f.filter(jwtAuthenticationFilter.apply(new JwtAuthenticationFilter.Config())))
                         .uri("lb://bus-service")
 
                 )
