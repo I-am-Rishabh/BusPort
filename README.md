@@ -252,10 +252,7 @@ GET /api/search?source=mumbai&destination=pune&date=2024-12-25
 2. Create the required databases
 3. Update configuration files with your database credentials
 4. Run each service in separate terminal windows
-5. Services will be available at:
-   - User Service: http://localhost:8081
-   - Bus Service: http://localhost:8082
-   - Booking Service: http://localhost:8083
+
 
 ## 🔧 Project Structure
 
